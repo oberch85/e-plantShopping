@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';         // Import useDispatch
+import { useDispatch, useSelector } from 'react-redux';         // Import useDispatch
 import { addItem } from './CartSlice';              // Import the addItem action
 import './ProductList.css'
 import CartItem from './CartItem';
@@ -7,6 +7,7 @@ function ProductList({ onHomeClick }) {
     const dispatch = useDispatch();                 // Initialize dispatch
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const CartItems = useSelector(state => state.cart.items);  // Get cart items from Redux store
 
     // State to track plants added to cart, stores array of plant names
     const [addedToCart, setAddedToCart] = useState({});
@@ -269,7 +270,11 @@ function ProductList({ onHomeClick }) {
         }));
     };
 
-
+    // Calculate total quantity of items in cart
+    const calculateTotalQuantity = () => {
+        return CartItems ? CartItems.reduce((total, item) => total + item.quantity, 0) : 0;
+    };
+    
     return (
         <div>
             <div className="navbar" style={styleObj}>
@@ -311,9 +316,14 @@ function ProductList({ onHomeClick }) {
                                 <div className="product-cost">{plant.cost}</div> {/* Display plant cost */}
                                 <button
                                     className="product-button"
-                                    onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
-                                >
-                                    Add to Cart
+                                    onClick={() => handleAddToCart(plant)}
+                                    disabled={addedToCart[plant.name]}          // Disable if already added
+                                    style={{
+                                        backgroundColor: addedToCart[plant.name] ? 'gray' : '',   // Gray out button
+                                        cursor: addedToCart[plant.name] ? 'not-allowed' : 'pointer'
+                                    }}
+                                    >
+                                    {addedToCart[plant.name] ? 'Added to Cart' : 'Add to Cart'}
                                 </button>
                                 </div>
                             ))}
